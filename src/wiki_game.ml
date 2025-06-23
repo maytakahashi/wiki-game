@@ -15,8 +15,32 @@ open! Core
    uniformity in article format. We can expect that all Wikipedia article links parsed
    from a Wikipedia page will have the form "/wiki/<TITLE>". *)
 let get_linked_articles contents : string list =
-  ignore (contents : string);
-  failwith "TODO"
+  let open Soup in
+  parse contents 
+  $$ "a[href]"
+  |> to_list
+  |> List.map ~f:(R.attribute "href")
+  |> List.filter ~f:(fun x -> match (Wikipedia_namespace.namespace x) with
+  | None -> false
+  | Some y -> true)
+  |> List.filter ~f:(fun x -> (Str.search_forward "^https://en.wikipedia.org/wiki/" x 0) = not Not_found)
+;;
+
+let%expect_test "get_linked_articles" = 
+  (* This test uses existing files on the filesystem. *)
+  let contents =
+    File_fetcher.fetch_exn
+      (Local (File_path.of_string "../resources/wiki"))
+      ~resource:"Cat"
+  in
+  List.iter (get_linked_articles contents) ~f:print_endline;
+  [%expect
+    {|
+    /wiki/Carnivore
+    /wiki/Domestication_of_the_cat
+    /wiki/Mammal
+    /wiki/Species
+    |}]
 ;;
 
 let print_links_command =
