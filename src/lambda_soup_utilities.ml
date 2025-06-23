@@ -60,7 +60,7 @@ let%expect_test "get_list_items" =
 
 (* Gets the first item of all unordered lists contained in an HTML page. *)
 let get_first_item_of_all_unordered_lists contents : string list =
-  ignore (contents : string);
+  let open Soup in
   failwith "TODO"
 ;;
 
