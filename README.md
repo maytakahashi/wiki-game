@@ -128,7 +128,7 @@ tools. In OCaml, we use the `Command` library to write apps that take commandlin
 arguments. 
 
 Let's take a brief detour here to learn about the `Command` library. Take a look at the
-command-demo directory on your box for a sample usage and explanations. 
+command-demo directory in the home directory of your box for a sample usage and explanations. 
 
 # Web scraping
 
