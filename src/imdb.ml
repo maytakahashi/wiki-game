@@ -3,9 +3,26 @@ open! Core
 (* [get_credits] should take the contents of an IMDB page for an actor and return a list
    of strings containing that actor's main credits. *)
 let get_credits contents : string list =
-  ignore (contents : string);
-  failwith "TODO"
+  let open Soup in
+  parse contents
+  $$ ".ipc-primary-image-list-card__title"
+  |> to_list
+  |> List.map ~f:(fun li -> texts li |> String.concat ~sep:"" |> String.strip)
 ;;
+
+let%expect_test "get_credits" =
+  let contents =
+    File_fetcher.fetch_exn Remote ~resource:"https://www.imdb.com/name/nm0000706/?ref_=fn_al_nm_1"
+  in
+  List.iter (get_credits contents) ~f:print_endline;
+  [%expect
+    {|
+    Everything Everywhere All at Once    
+    Crouching Tiger, Hidden Dragon
+    Wicked
+    Kung Fu Panda 2
+    |}]
+;; 
 
 let print_credits_command =
   let open Command.Let_syntax in

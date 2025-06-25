@@ -118,10 +118,17 @@ let visualize_command =
 
 (* [find_friend_group network ~person] returns a list of all people who are mutually
    connected to the provided [person] in the provided [network]. *)
-let find_friend_group network ~person : Person.t list =
-  ignore (network : Network.t);
-  ignore (person : Person.t);
-  failwith "TODO"
+let find_friend_group (network : Network.t) ~person : Person.t list =
+  let network = network |> Person.Map.of_alist_exn
+  let visited = (Person.Hash_set.create ())in
+  let rec dfs node visited = 
+    let adj = Map.find_exn network node in
+    List.iter adj ~f:(fun node -> 
+      if not (Hash_set.mem visited node) 
+        then (Hash_set.add visited node); dfs node visited) 
+    in
+  dfs person visited;
+  List.map (Hash_set.to_list visited) ~f:(fun x -> Person.of_string x)
 ;;
 
 let find_friend_group_command =
