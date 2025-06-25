@@ -120,7 +120,11 @@ let%expect_test "get_bolded_text" =
   List.iter (get_bolded_text contents) ~f:print_endline;
   [%expect
     {|
-    carnivore Predators Scavengers insectivores piscivores
+    carnivore
+    Predators
+    Scavengers
+    insectivores
+    piscivores
     |}]
 ;;
 (* [make_command ~summary ~f] is a helper function that builds a simple HTML parsing

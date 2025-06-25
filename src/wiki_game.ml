@@ -21,9 +21,10 @@ let get_linked_articles contents : string list =
   |> to_list
   |> List.map ~f:(R.attribute "href")
   |> List.filter ~f:(fun x -> match (Wikipedia_namespace.namespace x) with
-  | None -> false
-  | Some y -> true)
-  |> List.filter ~f:(fun x -> (Str.search_forward "^https://en.wikipedia.org/wiki/" x 0) = not Not_found)
+  | None -> true
+  | _ -> false)
+  |> List.filter ~f:(fun x -> String.is_prefix ~prefix: "/wiki/" x)
+  |> List.remove_consecutive_duplicates ~equal:String.equal
 ;;
 
 let%expect_test "get_linked_articles" = 
@@ -36,10 +37,10 @@ let%expect_test "get_linked_articles" =
   List.iter (get_linked_articles contents) ~f:print_endline;
   [%expect
     {|
-    /wiki/Carnivore
     /wiki/Domestication_of_the_cat
-    /wiki/Mammal
     /wiki/Species
+    /wiki/Carnivore
+    /wiki/Mammal
     |}]
 ;;
 
