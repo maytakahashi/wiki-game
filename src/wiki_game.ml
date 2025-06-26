@@ -109,7 +109,7 @@ module Dot = Graph.Graphviz.Dot (struct
 let visualize ?(max_depth = 3) ~origin ~output_file ~how_to_fetch () : unit =
   let visited = Wiki.Hash_set.create () in
   let graph = G.create () in
-  let rec bfs node visited n =
+  let rec bfs node n =
     if n > 0 && not (Hash_set.mem visited node)
     then (
       let contents = File_fetcher.fetch_exn how_to_fetch ~resource:node in
@@ -118,10 +118,10 @@ let visualize ?(max_depth = 3) ~origin ~output_file ~how_to_fetch () : unit =
         G.add_edge graph adj node;
         if not (Hash_set.mem visited adj) then (
           Hash_set.add visited node;
-          bfs adj visited (n - 1))))
+          bfs adj (n - 1))))
   in
   G.add_vertex graph origin;
-  bfs origin visited max_depth;
+  bfs origin max_depth;
   Dot.output_graph
     (Out_channel.create (File_path.to_string output_file))
     graph
