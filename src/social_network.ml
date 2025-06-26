@@ -119,17 +119,30 @@ let visualize_command =
 (* [find_friend_group network ~person] returns a list of all people who are mutually
    connected to the provided [person] in the provided [network]. *)
 let find_friend_group (network : Network.t) ~person : Person.t list =
-  let network = network |> Person.Map.of_alist_exn
-  let visited = (Person.Hash_set.create ())in
+  let visited = (Person.Hash_set.create ()) in
+  let graph = G.create () in
+  Set.iter network ~f:(fun (person1, person2) ->
+    G.add_edge graph person1 person2);
+    
   let rec dfs node visited = 
-    let adj = Map.find_exn network node in
+    let adj = G.succ graph node in
     List.iter adj ~f:(fun node -> 
       if not (Hash_set.mem visited node) 
-        then (Hash_set.add visited node); dfs node visited) 
+        then ((Hash_set.add visited node); dfs node visited)) 
     in
   dfs person visited;
   List.map (Hash_set.to_list visited) ~f:(fun x -> Person.of_string x)
 ;;
+let%expect_test "find_friend_group" = 
+  let network = Network.of_file (File_path.of_string "../resources/friends.txt") in
+  List.iter (find_friend_group network ~person:"romeo") ~f:print_endline;
+  [%expect
+    {|
+    romeo
+    juliet
+    |}]
+;;
+
 
 let find_friend_group_command =
   let open Command.Let_syntax in
